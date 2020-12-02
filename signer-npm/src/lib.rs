@@ -21,6 +21,7 @@ mod ledger_errors;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+
 pub fn set_panic_hook() {
     // When the `console_error_panic_hook` feature is enabled, we can call the
     // `set_panic_hook` function at least once during initialization, and then
@@ -315,14 +316,14 @@ pub fn create_multisig_with_fee(
     value: String,
     required: i32,
     nonce: u32,
-    duration: i64,
-    start_epoch: i64,
-    gas_limit: i64,
+    duration: String,
+    start_epoch: String,
+    gas_limit: String,
     gas_fee_cap: String,
     gas_premium: String,
 ) -> Result<JsValue, JsValue> {
     set_panic_hook();
-
+    
     let addresses_strings_tmp: Result<Vec<String>, _> =
         addresses.into_iter().map(signer_value_to_string).collect();
 
@@ -332,6 +333,13 @@ pub fn create_multisig_with_fee(
             return Err(JsValue::from_str("Error while parsing addresses"));
         }
     };
+    
+    let se = i64::from_str_radix(&start_epoch, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;    
+    let d = i64::from_str_radix(&duration, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
+    let gl = i64::from_str_radix(&gas_limit, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
 
     let multisig_transaction = filecoin_signer::create_multisig(
         sender_address,
@@ -339,9 +347,9 @@ pub fn create_multisig_with_fee(
         value,
         required as i64,
         nonce as u64,
-        duration,
-        start_epoch,
-        gas_limit,
+        d,
+        se,
+        gl,
         gas_fee_cap,
         gas_premium,
     )
@@ -362,11 +370,11 @@ pub fn create_multisig(
     value: String,
     required: i32,
     nonce: u32,
-    duration: i64,
-    start_epoch: i64,
+    duration: String,
+    start_epoch: String,
 ) -> Result<JsValue, JsValue> {
     set_panic_hook();
-
+    
     let addresses_strings_tmp: Result<Vec<String>, _> =
         addresses.into_iter().map(signer_value_to_string).collect();
 
@@ -376,6 +384,11 @@ pub fn create_multisig(
             return Err(JsValue::from_str("Error while parsing addresses"));
         }
     };
+    
+    let se = i64::from_str_radix(&start_epoch, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;    
+    let d = i64::from_str_radix(&duration, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
 
     let multisig_transaction = filecoin_signer::create_multisig(
         sender_address,
@@ -383,8 +396,8 @@ pub fn create_multisig(
         value,
         required as i64,
         nonce as u64,
-        duration,
-        start_epoch,
+        d,
+        se,
         0,
         "0".to_string(),
         "0".to_string(),
@@ -407,11 +420,14 @@ pub fn propose_multisig_with_fee(
     from_address: String,
     amount: String,
     nonce: u32,
-    gas_limit: i64,
+    gas_limit: String,
     gas_fee_cap: String,
     gas_premium: String,
 ) -> Result<JsValue, JsValue> {
     set_panic_hook();
+
+    let gl = i64::from_str_radix(&gas_limit, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
 
     let multisig_transaction = filecoin_signer::proposal_multisig_message(
         multisig_address,
@@ -419,7 +435,7 @@ pub fn propose_multisig_with_fee(
         from_address,
         amount,
         nonce as u64,
-        gas_limit,
+        gl,
         gas_fee_cap,
         gas_premium,
     )
@@ -473,11 +489,14 @@ pub fn approve_multisig_with_fee(
     amount: String,
     from_address: String,
     nonce: u32,
-    gas_limit: i64,
+    gas_limit: String,
     gas_fee_cap: String,
     gas_premium: String,
 ) -> Result<JsValue, JsValue> {
     set_panic_hook();
+
+    let gl = i64::from_str_radix(&gas_limit, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
 
     let multisig_transaction = filecoin_signer::approve_multisig_message(
         multisig_address,
@@ -487,7 +506,7 @@ pub fn approve_multisig_with_fee(
         amount,
         from_address,
         nonce as u64,
-        gas_limit,
+        gl,
         gas_fee_cap,
         gas_premium,
     )
@@ -545,11 +564,14 @@ pub fn cancel_multisig_with_fee(
     amount: String,
     from_address: String,
     nonce: u32,
-    gas_limit: i64,
+    gas_limit: String,
     gas_fee_cap: String,
     gas_premium: String,
 ) -> Result<JsValue, JsValue> {
     set_panic_hook();
+
+    let gl = i64::from_str_radix(&gas_limit, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
 
     let multisig_transaction = filecoin_signer::cancel_multisig_message(
         multisig_address,
@@ -559,7 +581,7 @@ pub fn cancel_multisig_with_fee(
         amount,
         from_address,
         nonce as u64,
-        gas_limit,
+        gl,
         gas_fee_cap,
         gas_premium,
     )
@@ -613,18 +635,21 @@ pub fn create_pymtchan_with_fee(
     to_address: String,
     amount: String,
     nonce: u32,
-    gas_limit: i64,
+    gas_limit: String,
     gas_fee_cap: String,
     gas_premium: String,
 ) -> Result<JsValue, JsValue> {
     set_panic_hook();
+
+    let gl = i64::from_str_radix(&gas_limit, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
 
     let pch_transaction = filecoin_signer::create_pymtchan(
         from_address,
         to_address,
         amount,
         nonce as u64,
-        gas_limit,
+        gl,
         gas_fee_cap,
         gas_premium,
     )
@@ -667,17 +692,20 @@ pub fn settle_pymtchan_with_fee(
     pch_address: String,
     from_address: String,
     nonce: u32,
-    gas_limit: i64,
+    gas_limit: String,
     gas_fee_cap: String,
     gas_premium: String,
 ) -> Result<JsValue, JsValue> {
     set_panic_hook();
 
+    let gl = i64::from_str_radix(&gas_limit, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
+
     let pch_transaction = filecoin_signer::settle_pymtchan(
         pch_address,
         from_address,
         nonce as u64,
-        gas_limit,
+        gl,
         gas_fee_cap,
         gas_premium,
     )
@@ -718,17 +746,20 @@ pub fn collect_pymtchan_with_fee(
     pch_address: String,
     from_address: String,
     nonce: u32,
-    gas_limit: i64,
+    gas_limit: String,
     gas_fee_cap: String,
     gas_premium: String,
 ) -> Result<JsValue, JsValue> {
     set_panic_hook();
 
+    let gl = i64::from_str_radix(&gas_limit, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
+
     let pch_transaction = filecoin_signer::collect_pymtchan(
         pch_address,
         from_address,
         nonce as u64,
-        gas_limit,
+        gl,
         gas_fee_cap,
         gas_premium,
     )
@@ -770,7 +801,7 @@ pub fn update_pymtchan_with_fee(
     from_address: String,
     signed_voucher: String,
     nonce: u32,
-    gas_limit: i64,
+    gas_limit: String,
     gas_fee_cap: String,
     gas_premium: String,
 ) -> Result<JsValue, JsValue> {
@@ -778,12 +809,15 @@ pub fn update_pymtchan_with_fee(
 
     // TODO: verify if `pch_address` is an actor address. Not needed but good improvement.
 
+    let gl = i64::from_str_radix(&gas_limit, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
+
     let pch_transaction = filecoin_signer::update_pymtchan(
         pch_address,
         from_address,
         signed_voucher,
         nonce as u64,
-        gas_limit,
+        gl,
         gas_fee_cap,
         gas_premium,
     )
@@ -841,23 +875,35 @@ pub fn sign_voucher(voucher: String, private_key_js: JsValue) -> Result<JsValue,
 #[wasm_bindgen(js_name = createVoucher)]
 pub fn create_voucher(
     payment_channel_address: String,
-    time_lock_min: i64,
-    time_lock_max: i64,
+    time_lock_min: String,
+    time_lock_max: String,
     amount: String,
-    lane: u64,
-    nonce: u64,
-    min_settle_height: i64,
+    lane: String,
+    nonce: u32,
+    min_settle_height: String,
 ) -> Result<JsValue, JsValue> {
     set_panic_hook();
+    
+    let tlmin = i64::from_str_radix(&time_lock_min, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
+    let tlmax = i64::from_str_radix(&time_lock_max, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
+
+    let l = u64::from_str_radix(&lane, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
+
+    let msh = i64::from_str_radix(&min_settle_height, 10)
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
+
 
     let voucher = filecoin_signer::create_voucher(
         payment_channel_address,
-        time_lock_min,
-        time_lock_max,
+        tlmin,
+        tlmax,
         amount,
-        lane,
-        nonce,
-        min_settle_height,
+        l,
+        nonce as u64,
+        msh,
     )
     .map_err(|e| {
         JsValue::from_str(format!("Error creating payment channel voucher: {}", e).as_str())
