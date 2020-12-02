@@ -21,7 +21,6 @@ mod ledger_errors;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-
 pub fn set_panic_hook() {
     // When the `console_error_panic_hook` feature is enabled, we can call the
     // `set_panic_hook` function at least once during initialization, and then
@@ -323,7 +322,7 @@ pub fn create_multisig_with_fee(
     gas_premium: String,
 ) -> Result<JsValue, JsValue> {
     set_panic_hook();
-    
+
     let addresses_strings_tmp: Result<Vec<String>, _> =
         addresses.into_iter().map(signer_value_to_string).collect();
 
@@ -333,9 +332,9 @@ pub fn create_multisig_with_fee(
             return Err(JsValue::from_str("Error while parsing addresses"));
         }
     };
-    
+
     let se = i64::from_str_radix(&start_epoch, 10)
-        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;    
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
     let d = i64::from_str_radix(&duration, 10)
         .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
     let gl = i64::from_str_radix(&gas_limit, 10)
@@ -374,7 +373,7 @@ pub fn create_multisig(
     start_epoch: String,
 ) -> Result<JsValue, JsValue> {
     set_panic_hook();
-    
+
     let addresses_strings_tmp: Result<Vec<String>, _> =
         addresses.into_iter().map(signer_value_to_string).collect();
 
@@ -384,9 +383,9 @@ pub fn create_multisig(
             return Err(JsValue::from_str("Error while parsing addresses"));
         }
     };
-    
+
     let se = i64::from_str_radix(&start_epoch, 10)
-        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;    
+        .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
     let d = i64::from_str_radix(&duration, 10)
         .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
 
@@ -883,7 +882,7 @@ pub fn create_voucher(
     min_settle_height: String,
 ) -> Result<JsValue, JsValue> {
     set_panic_hook();
-    
+
     let tlmin = i64::from_str_radix(&time_lock_min, 10)
         .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
     let tlmax = i64::from_str_radix(&time_lock_max, 10)
@@ -894,7 +893,6 @@ pub fn create_voucher(
 
     let msh = i64::from_str_radix(&min_settle_height, 10)
         .map_err(|e| JsValue::from(format!("Error converting to i64: {}", e)))?;
-
 
     let voucher = filecoin_signer::create_voucher(
         payment_channel_address,
